@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+import os
+import sys
+import shutil
+from argparse import ArgumentParser
+
+CHROOT_LINUX_DIR = '/var/lib/chroot-linux'
+if not os.path.isdir(CHROOT_LINUX_DIR):
+	print('Creating %s' % CHROOT_LINUX_DIR)
+	os.mkdir(CHROOT_LINUX_DIR)
+
+parser = ArgumentParser()
+
+parser.add_argument('action', help="""What chroot-linux should do. 
+These actions are currently available:
+add <name>: add a chroot from a tarball
+remove <name>: remove a chroot
+enter <name>: enter a chroot""")
+parser.add_argument('--name', '-n', help="The target chroot's name")
+parser.add_argument('--file', '-f', help='Tarball or directory to add chroot from')
+parser.add_argument('--command', '-c', 
+	help='Command to be run after entering the chroot. Defaults to /bin/sh',
+	default='/bin/sh')
+args = parser.parse_args()
+def assert_name():
+	if not args.name:
+		print("Target chroot name not specified!")
+		sys.exit(1)
+if args.action == 'add':
+	assert_name()
+	if not args.file:
+		print("Tarball file or directory not specified")
+		sys.exit(1)
+	file = os.path.abspath(args.file)
+	dir = os.path.join(CHROOT_LINUX_DIR, args.name)
+	if os.path.isdir(file):
+		print("Copying files from %s to %s" % (file, dir))
+		shutil.copytree(file, dir, symlinks=True)
+	else:
+		print('Creating %s' % dir)
+		os.mkdir(dir)
+		os.chdir(dir)
+		print('Extracting tarball...')
+		os.system('tar -xpvf %s' % file)
+elif args.action == 'remove':
+	assert_name()
+	dir = os.path.join(CHROOT_LINUX_DIR, args.name)
+	print('Removing %s...' % dir)
+	shutil.rmtree(dir)
+elif args.action == 'list':
+	for item in os.listdir(CHROOT_LINUX_DIR):
+		if os.path.isdir(os.path.join(CHROOT_LINUX_DIR, item)):
+			print(item)
+elif args.action == 'enter':
+	assert_name()
+	dir = os.path.join(CHROOT_LINUX_DIR, args.name)
+	print('Chrooting into %s...' % dir)
+	os.chroot(dir)
+	os.chdir('/')
+	argv = args.command.split(' ')
+	os.execv(argv[0], argv)
+else:
+	print("Unknown action %s" % args.action);
+	sys.exit(1);
