@@ -2,7 +2,7 @@
 Install and manage Linux inside a chroot.
 # Installation
 ```bash
-sudo curl -sSL https://github.com/programmeruser2/chroot-linux/raw/main/chroot-linux > /usr/local/bin/chroot-linux
+sudo curl -fsSL https://github.com/programmeruser2/chroot-linux/raw/main/chroot-linux > /usr/local/bin/chroot-linux
 chmod +x /usr/local/bin/chroot-linux 
 ```
 # FAQ
