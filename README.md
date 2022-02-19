@@ -1,3 +1,4 @@
+> This project isn't in active development nor is it out of alpha. Please don't use this in production. Pull requests and issues are still welcome though.
 # chroot-linux
 Install and manage Linux inside a chroot.
 # Installation
